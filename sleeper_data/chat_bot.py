@@ -1,7 +1,7 @@
 # Work with Python 3.6
 from discord.ext import commands
-from discord_bot.command_groups.trade_commands import TradeCommands
-from discord_bot.command_groups.misc_commands import MiscCommands
+from sleeper_data.command_groups.trade_commands import TradeCommands
+from sleeper_data.command_groups.misc_commands import MiscCommands
 import os
 
 

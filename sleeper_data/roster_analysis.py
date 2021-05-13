@@ -1,5 +1,5 @@
 from sleeper_wrapper import Players, League, User
-from discord_bot.player_value import find_value
+from sleeper_data.player_value import find_value
 
 
 def get_roster_ages(league_id=649923060580864000):

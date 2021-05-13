@@ -14,7 +14,7 @@ def parse_combine_row(row):
 
 
 def load_combine():
-    with open("discord_bot/combine/combine.csv") as f:
+    with open("sleeper_data/combine/combine.csv") as f:
         records = csv.DictReader(f)
         for row in records:
             prices[row['Player']] = parse_combine_row(row)

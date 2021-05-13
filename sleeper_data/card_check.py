@@ -1,5 +1,5 @@
 from sleeper_wrapper import Players, League, User
-from discord_bot.nfl_api.nfl_fixtures import get_teams_playing
+from sleeper_data.nfl_api.nfl_fixtures import get_teams_playing
 from notifications.bot import get_current_week
 
 
