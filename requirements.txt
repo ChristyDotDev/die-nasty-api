@@ -1,0 +1,9 @@
+pytest==4.6.2
+schedule==0.6.0
+sleeper-api-wrapper==1.0.7
+pendulum==2.0.5
+requests==2.22.0
+certifi==2020.6.20
+fuzzywuzzy==0.18.0
+sportsreference==0.5.2
+Flask==2.0.0

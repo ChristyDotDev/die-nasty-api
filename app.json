@@ -1,0 +1,18 @@
+{
+  "name": "die-nasty-backend",
+  "description": "A backend for a sleeper website",
+  "repository": "https://github.com/christytc10/die-nasty",
+  "logo": "",
+  "keywords": [
+    "Sleeper",
+    "fantasy-football",
+    "Python",
+    "Heroku",
+  ],
+  "env": {
+    "LEAGUE_ID": {
+      "description": "The Sleeper league id.",
+      "value": "1"
+    }
+  }
+}
