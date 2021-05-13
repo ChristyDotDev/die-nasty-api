@@ -1,10 +1,13 @@
-from flask import Flask
+from flask import Flask, jsonify
+import os
+
 app = Flask(__name__)
 
 
 @app.route("/")
 def hello():
-    return "Hello World!"
+    return jsonify({'league': os.getenv("LEAGUE_ID"),
+                    'status': 'up'})
 
 
 if __name__ == '__main__':
