@@ -1,1 +1,1 @@
-worker: python3 bootstrapper.py
+heroku ps:scale web=1
