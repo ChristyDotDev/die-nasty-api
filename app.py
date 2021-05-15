@@ -4,7 +4,7 @@ from sleeper_data.sleeper_api import SleeperApi
 import os
 
 app = Flask(__name__)
-sleeper_api = SleeperApi()
+sleeper_api = SleeperApi(os.getenv("LEAGUE_ID"))
 
 
 @app.route("/")
@@ -22,11 +22,16 @@ def player_value(player):
 def get_players():
     if request.data:
         player_ids = request.get_json()['ids']
-
         filtered_players = {k: sleeper_api.players_simple[k] for k in player_ids}
         return jsonify(filtered_players)
     else:
         return jsonify(sleeper_api.players_simple)
+
+
+@app.route('/league/trades', methods=['GET'])
+def get_trades():
+    trades = sleeper_api.get_trades()
+    return jsonify(trades)
 
 
 if __name__ == '__main__':
