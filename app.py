@@ -34,6 +34,12 @@ def get_trades():
     return jsonify(trades)
 
 
+@app.route('/league/rosters', methods=['GET'])
+def get_rosters():
+    rosters = sleeper_api.get_rosters()
+    return jsonify(rosters)
+
+
 if __name__ == '__main__':
     # Threaded option to enable multiple instances for multiple user access support
     app.run(threaded=True, port=5000)

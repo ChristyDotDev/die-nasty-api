@@ -4,6 +4,8 @@ import functools
 
 class SleeperApi:
 
+    POSITIONS = ["QB", "RB", "WR", "TE"]
+
     def __init__(self, league_id):
         self.league_id = league_id
         league_api = League(league_id)
@@ -40,6 +42,7 @@ class SleeperApi:
                 "team": player_data.get("team"),
                 "full_name": player_data.get("full_name"),
                 "height": player_data.get("height"),
+                "avatar_url": f'https://sleepercdn.com/content/nfl/players/{player_data.get("player_id")}.jpg',
             }
         return basic
 
@@ -80,3 +83,18 @@ class SleeperApi:
             }
             trades_objs.append(trade_obj)
         return trades_objs
+
+    def get_rosters(self):
+        print(self.rosters)
+        rosters_list = []
+        for roster in self.rosters:
+            players = [self.players_simple[player_id] for player_id in roster.get("players")]
+            players.sort(key=lambda p: self.POSITIONS.index(p.get("position")))
+            rosters_list.append({
+                "player_ids": roster.get("players"),
+                "taxi": roster.get("taxi"),
+                "starters": roster.get("starters"),
+                "owner_id": roster.get("owner_id"),
+                "players": players
+            })
+        return rosters_list
