@@ -6,6 +6,13 @@ class SleeperApi:
 
     POSITIONS = ["QB", "RB", "WR", "TE"]
 
+    def ordinal(self, n):
+        n = int(n)
+        suffix = ['th', 'st', 'nd', 'rd', 'th'][min(n % 10, 4)]
+        if 11 <= (n % 100) <= 13:
+            suffix = 'th'
+        return str(n) + suffix
+
     def __init__(self, league_id):
         self.league_id = league_id
         league_api = League(league_id)
@@ -67,19 +74,26 @@ class SleeperApi:
 
     def get_trades(self):
         trades = [t for t in self.transactions if t['type'] == 'trade' and t['status'] == 'complete']
-
-        trades_objs = []
+        trades_objs=[]
         for trade in trades:
-            for add in trade['adds']:
-                new_roster = next((r for r in self.rosters if r['roster_id'] == trade['adds'][add]), None)
+            trade_parts = {}
+            for tr in trade['roster_ids']:
+                new_roster = next((r for r in self.rosters if r['roster_id'] == tr), None)
                 new_owner = next((r for r in self.users if r['user_id'] == new_roster['owner_id']), None)
-                print(new_owner['display_name'])
-                print(self.players[add]['full_name'])
+                trade_parts[tr] = {
+                    "newRoster": new_owner['display_name'],
+                    "adds": [],
+                }
+            for add in trade['adds']:
+                new_roster = trade['adds'][add]
+                trade_parts[new_roster]['adds'].append(self.players[add]['full_name'])
+            for pick in trade['draft_picks']:
+                trade_parts[pick['owner_id']]['adds'].append(f"{pick['season']} {self.ordinal(pick['round'])}")
+
             trade_obj = {
                 "timestamp": trade['status_updated'],
                 "transaction_id": trade["transaction_id"],
-                "adds": trade["adds"],
-                "draft_picks": trade["draft_picks"]
+                "trade_parts": trade_parts,
             }
             trades_objs.append(trade_obj)
         return trades_objs
