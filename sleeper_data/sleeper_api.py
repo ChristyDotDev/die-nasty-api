@@ -90,10 +90,11 @@ class SleeperApi:
             for pick in trade['draft_picks']:
                 trade_parts[pick['owner_id']]['adds'].append(f"{pick['season']} {self.ordinal(pick['round'])}")
 
+            adds = [trade_parts[x] for x in trade_parts]
             trade_obj = {
                 "timestamp": trade['status_updated'],
                 "transaction_id": trade["transaction_id"],
-                "trade_parts": trade_parts,
+                "trade_parts": adds,
             }
             trades_objs.append(trade_obj)
         return trades_objs
