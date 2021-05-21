@@ -41,7 +41,7 @@ class SleeperApi:
                 for txn in txns:
                     self.transactions.append(txn)
             # get rosters and add to list. Or do roster IDs stay the same through the years
-        print(self.transactions)
+        self.transactions.sort(key=lambda k: k['status_updated'], reverse=True)
         print('finished')
         print("initialised Sleeper API")
 
