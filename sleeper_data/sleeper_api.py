@@ -1,9 +1,9 @@
-from sleeper_wrapper import Players, League
 import functools
+
+from sleeper_wrapper import Players, League
 
 
 class SleeperApi:
-
     POSITIONS = ["QB", "RB", "WR", "TE"]
 
     def ordinal(self, n):
@@ -17,6 +17,7 @@ class SleeperApi:
         self.league_id = league_id
         league_api = League(league_id)
         league = league_api.get_league()
+
         self.current_week = league['settings']['leg']
         # previous_league = league['previous_league_id']
         self.rosters = league_api.get_rosters()
@@ -26,6 +27,22 @@ class SleeperApi:
             txns = league_api.get_transactions(week)
             for txn in txns:
                 self.transactions.append(txn)
+
+        past_leagues = []
+        past_leagues.append(league['previous_league_id'])
+        while past_leagues:
+            past_league_id = past_leagues.pop()
+            past_league_api = League(past_league_id)
+            past_league_info = past_league_api.get_league()
+            if 'previous_league_id' in past_league_info and int(past_league_info['previous_league_id']) > 0:
+                past_leagues.append(past_league_info['previous_league_id'])
+            for week in range(0, 17):
+                txns = past_league_api.get_transactions(week)
+                for txn in txns:
+                    self.transactions.append(txn)
+            # get rosters and add to list. Or do roster IDs stay the same through the years
+        print(self.transactions)
+        print('finished')
         print("initialised Sleeper API")
 
     @functools.cached_property
@@ -74,7 +91,7 @@ class SleeperApi:
 
     def get_trades(self):
         trades = [t for t in self.transactions if t['type'] == 'trade' and t['status'] == 'complete']
-        trades_objs=[]
+        trades_objs = []
         for trade in trades:
             trade_parts = {}
             for tr in trade['roster_ids']:
@@ -84,11 +101,13 @@ class SleeperApi:
                     "newRoster": new_owner['display_name'],
                     "adds": [],
                 }
-            for add in trade['adds']:
-                new_roster = trade['adds'][add]
-                trade_parts[new_roster]['adds'].append(self.players[add]['full_name'])
-            for pick in trade['draft_picks']:
-                trade_parts[pick['owner_id']]['adds'].append(f"{pick['season']} {self.ordinal(pick['round'])}")
+            if 'adds' in trade and trade['adds'] is not None:
+                for add in trade['adds']:
+                    new_roster = trade['adds'][add]
+                    trade_parts[new_roster]['adds'].append(self.players[add]['full_name'])
+            if 'draft_picks' in trade and trade['draft_picks'] is not None:
+                for pick in trade['draft_picks']:
+                    trade_parts[pick['owner_id']]['adds'].append(f"{pick['season']} {self.ordinal(pick['round'])}")
 
             adds = [trade_parts[x] for x in trade_parts]
             trade_obj = {
