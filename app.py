@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, request
-from sleeper_data.player_value import find_value
 from sleeper_data.sleeper_api import SleeperApi
 import os
 
@@ -38,6 +37,12 @@ def get_trades():
 def get_rosters():
     rosters = sleeper_api.get_rosters()
     return jsonify(rosters)
+
+
+@app.route('/league/schedule', methods=['GET'])
+def get_schedule():
+    schedule = sleeper_api.get_schedule()
+    return jsonify(schedule)
 
 
 if __name__ == '__main__':

@@ -132,3 +132,23 @@ class SleeperApi:
                 "players": players
             })
         return rosters_list
+
+    def get_schedule(self):
+        league_api = League(self.league_id)
+        schedule = league_api.get_matchups(1)
+        schedule_obj = {}
+        matchup_ids = [x['matchup_id'] for x in schedule]
+        for m in matchup_ids:
+            schedule_obj[m] = []
+        #print(schedule)
+        for team in schedule:
+            print(team)
+            roster = next((r for r in self.rosters if r['roster_id'] == team['roster_id']), None)
+            user = next((r for r in self.users if r['user_id'] == roster['owner_id']), None)
+            team_name = user['metadata'].get('team_name', user['display_name'])
+            schedule_obj[team['matchup_id']].append({
+                "team": team_name,
+                "avatar": f"https://sleepercdn.com/avatars/thumbs/{user['avatar']}"
+            })
+            print(user)
+        return schedule_obj
