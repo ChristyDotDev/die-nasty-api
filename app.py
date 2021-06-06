@@ -45,6 +45,12 @@ def get_schedule():
     return jsonify(schedule)
 
 
+@app.route('/league/drafts', methods=['GET'])
+def get_drafts():
+    schedule = sleeper_api.get_drafts
+    return jsonify(schedule)
+
+
 if __name__ == '__main__':
     # Threaded option to enable multiple instances for multiple user access support
     app.run(threaded=True, port=5000)

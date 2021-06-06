@@ -1,6 +1,16 @@
 import functools
+import urllib.request, json
 
-from sleeper_wrapper import Players, League
+from sleeper_wrapper import Players, League, Drafts
+
+
+def get_traded_draft_picks(draft_id):
+    trade_url = f"https://api.sleeper.app/v1/draft/{draft_id}/traded_picks"
+    print(trade_url)
+    with urllib.request.urlopen(trade_url) as url:
+        data = json.loads(url.read().decode())
+        print(data)
+        return data
 
 
 class SleeperApi:
@@ -23,13 +33,29 @@ class SleeperApi:
         self.rosters = league_api.get_rosters()
         self.users = league_api.get_users()
         self.transactions = []
+        self.picks = {}
         for week in range(0, self.current_week + 1):
             txns = league_api.get_transactions(week)
             for txn in txns:
                 self.transactions.append(txn)
 
-        past_leagues = []
-        past_leagues.append(league['previous_league_id'])
+        past_leagues = [league['previous_league_id']]
+        # TODO - extract method from this
+        draft = Drafts(league['draft_id'])
+        draft_picks = draft.get_all_picks()
+        draft_info = draft.get_specific_draft()
+        for pick in draft_picks:
+            player = pick["player_id"]
+            og_roster = draft_info["slot_to_roster_id"][str(pick["draft_slot"])]
+            pick_round = pick['round']
+            draft_season = draft_info['season']
+            if draft_info['season'] not in self.picks:
+                self.picks[draft_info['season']] = {}
+            if pick_round not in self.picks[draft_info['season']]:
+                self.picks[draft_season][pick_round] = {}
+            self.picks[draft_season][pick_round][og_roster] = player
+        # TODO - end of todo
+
         while past_leagues:
             past_league_id = past_leagues.pop()
             past_league_api = League(past_league_id)
@@ -41,8 +67,23 @@ class SleeperApi:
                 for txn in txns:
                     self.transactions.append(txn)
             # get rosters and add to list. Or do roster IDs stay the same through the years
+            print(f'DRAFT: {league["draft_id"]}')
+            drafts = past_league_api.get_all_drafts()
+            for draft_obj in drafts:
+                draft = Drafts(draft_obj['draft_id'])
+                draft_picks = draft.get_all_picks()
+                draft_info = draft.get_specific_draft()
+                for pick in draft_picks:
+                    player = pick["player_id"]
+                    og_roster = draft_info["slot_to_roster_id"][str(pick["draft_slot"])]
+                    pick_round = pick['round']
+                    draft_season = draft_info['season']
+                    if draft_info['season'] not in self.picks:
+                        self.picks[draft_info['season']] = {}
+                    if pick_round not in self.picks[draft_info['season']]:
+                        self.picks[draft_season][pick_round] = {}
+                    self.picks[draft_season][pick_round][og_roster] = player
         self.transactions.sort(key=lambda k: k['status_updated'], reverse=True)
-        print('finished')
         print("initialised Sleeper API")
 
     @functools.cached_property
@@ -107,7 +148,14 @@ class SleeperApi:
                     trade_parts[new_roster]['adds'].append(self.players[add]['full_name'])
             if 'draft_picks' in trade and trade['draft_picks'] is not None:
                 for pick in trade['draft_picks']:
-                    trade_parts[pick['owner_id']]['adds'].append(f"{pick['season']} {self.ordinal(pick['round'])}")
+                    if pick['season'] in self.picks:
+                        picked_name = self.players_simple[self.picks[pick['season']][pick['round']][pick['roster_id']]]['full_name']
+                        trade_parts[pick['owner_id']]['adds'].append(
+                            f"{pick['season']} {self.ordinal(pick['round'])} ({picked_name})")
+                    else:
+                        trade_parts[pick['owner_id']]['adds'].append(
+                            f"{pick['season']} {self.ordinal(pick['round'])}")
+
 
             adds = [trade_parts[x] for x in trade_parts]
             trade_obj = {
@@ -119,7 +167,6 @@ class SleeperApi:
         return trades_objs
 
     def get_rosters(self):
-        print(self.rosters)
         rosters_list = []
         for roster in self.rosters:
             players = [self.players_simple[player_id] for player_id in roster.get("players")]
@@ -140,7 +187,6 @@ class SleeperApi:
         matchup_ids = [x['matchup_id'] for x in schedule]
         for m in matchup_ids:
             schedule_obj[m] = []
-        #print(schedule)
         for team in schedule:
             print(team)
             roster = next((r for r in self.rosters if r['roster_id'] == team['roster_id']), None)
@@ -150,5 +196,8 @@ class SleeperApi:
                 "team": team_name,
                 "avatar": f"https://sleepercdn.com/avatars/thumbs/{user['avatar']}"
             })
-            print(user)
         return schedule_obj
+
+    @functools.cached_property
+    def get_drafts(self):
+        return self.picks
