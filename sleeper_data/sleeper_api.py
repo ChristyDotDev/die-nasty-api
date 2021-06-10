@@ -194,7 +194,8 @@ class SleeperApi:
             team_name = user['metadata'].get('team_name', user['display_name'])
             schedule_obj[team['matchup_id']].append({
                 "team": team_name,
-                "avatar": f"https://sleepercdn.com/avatars/thumbs/{user['avatar']}"
+                "avatar": f"https://sleepercdn.com/avatars/thumbs/{user['avatar']}",
+                "roster": team['roster_id']
             })
         return schedule_obj
 
