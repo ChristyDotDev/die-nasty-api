@@ -169,6 +169,7 @@ class SleeperApi:
     def get_rosters(self):
         rosters_list = []
         for roster in self.rosters:
+            owner_name = next((r['display_name'] for r in self.users if r['user_id'] == roster['owner_id']), "UNKNOWN")
             players = [self.players_simple[player_id] for player_id in roster.get("players")]
             players.sort(key=lambda p: self.POSITIONS.index(p.get("position")))
             rosters_list.append({
@@ -177,6 +178,7 @@ class SleeperApi:
                 "taxi": roster.get("taxi"),
                 "starters": roster.get("starters"),
                 "owner_id": roster.get("owner_id"),
+                "owner_name": owner_name,
                 "players": players
             })
         return rosters_list
