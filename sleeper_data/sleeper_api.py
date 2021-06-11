@@ -6,10 +6,8 @@ from sleeper_wrapper import Players, League, Drafts
 
 def get_traded_draft_picks(draft_id):
     trade_url = f"https://api.sleeper.app/v1/draft/{draft_id}/traded_picks"
-    print(trade_url)
     with urllib.request.urlopen(trade_url) as url:
         data = json.loads(url.read().decode())
-        print(data)
         return data
 
 
@@ -183,25 +181,36 @@ class SleeperApi:
             })
         return rosters_list
 
-    def get_schedule(self):
+    @functools.cached_property
+    def schedule(self):
         league_api = League(self.league_id)
-        schedule = league_api.get_matchups(1)
-        schedule_obj = {}
-        matchup_ids = [x['matchup_id'] for x in schedule]
-        for m in matchup_ids:
-            schedule_obj[m] = []
-        for team in schedule:
-            print(team)
-            roster = next((r for r in self.rosters if r['roster_id'] == team['roster_id']), None)
-            user = next((r for r in self.users if r['user_id'] == roster['owner_id']), None)
-            team_name = user['metadata'].get('team_name', user['display_name'])
-            schedule_obj[team['matchup_id']].append({
-                "team": team_name,
-                "avatar": f"https://sleepercdn.com/avatars/thumbs/{user['avatar']}",
-                "roster": team['roster_id']
-            })
-        return schedule_obj
+        weeks = {}
+        for week in range(1, 14):
+            schedule = league_api.get_matchups(week)
+            schedule_obj = {}
+            matchup_ids = [x['matchup_id'] for x in schedule]
+            for m in matchup_ids:
+                schedule_obj[m] = []
+            for team in schedule:
+                roster = next((r for r in self.rosters if r['roster_id'] == team['roster_id']), None)
+                user = next((r for r in self.users if r['user_id'] == roster['owner_id']), None)
+                team_name = user['metadata'].get('team_name', user['display_name'])
+                schedule_obj[team['matchup_id']].append({
+                    "team": team_name,
+                    "avatar": f"https://sleepercdn.com/avatars/thumbs/{user['avatar']}",
+                    "roster": team['roster_id']
+                })
+            print(schedule_obj)
+            weeks[week] = schedule_obj
+        return weeks
 
     @functools.cached_property
     def get_drafts(self):
         return self.picks
+
+    def nfl_slate(self):
+        slate_url = f"https://api.sleeper.app/v1/state/nfl"
+        with urllib.request.urlopen(slate_url) as url:
+            data = json.loads(url.read().decode())
+            print(data)
+            return data

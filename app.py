@@ -41,7 +41,12 @@ def get_rosters():
 
 @app.route('/league/schedule', methods=['GET'])
 def get_schedule():
-    schedule = sleeper_api.get_schedule()
+    slate = sleeper_api.nfl_slate()
+    fixtures = sleeper_api.schedule
+    schedule = {
+        "fixtures": fixtures,
+        "currentWeek": slate['week']
+    }
     return jsonify(schedule)
 
 
