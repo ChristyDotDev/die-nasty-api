@@ -172,6 +172,7 @@ class SleeperApi:
             players = [self.players_simple[player_id] for player_id in roster.get("players")]
             players.sort(key=lambda p: self.POSITIONS.index(p.get("position")))
             rosters_list.append({
+                "roster_id": roster.get("roster_id"),
                 "player_ids": roster.get("players"),
                 "taxi": roster.get("taxi"),
                 "starters": roster.get("starters"),
