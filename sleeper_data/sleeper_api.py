@@ -184,8 +184,9 @@ class SleeperApi:
     @functools.cached_property
     def schedule(self):
         league_api = League(self.league_id)
+        # TODO - get regular season weeks from league settings
         weeks = {}
-        for week in range(1, 14):
+        for week in range(1, 13):
             schedule = league_api.get_matchups(week)
             schedule_obj = {}
             matchup_ids = [x['matchup_id'] for x in schedule]
