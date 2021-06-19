@@ -56,6 +56,12 @@ def get_drafts():
     return jsonify(schedule)
 
 
+@app.route('/league/waiver', methods=['GET'])
+def get_waiver_order():
+    waiver_order = sleeper_api.get_waiver_order()
+    return jsonify(waiver_order)
+
+
 if __name__ == '__main__':
     # Threaded option to enable multiple instances for multiple user access support
     app.run(threaded=True, port=5000)

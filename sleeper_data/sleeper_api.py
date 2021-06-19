@@ -196,6 +196,7 @@ class SleeperApi:
                 roster = next((r for r in self.rosters if r['roster_id'] == team['roster_id']), None)
                 user = next((r for r in self.users if r['user_id'] == roster['owner_id']), None)
                 team_name = user['metadata'].get('team_name', user['display_name'])
+                #TODO - team['starters'] and team['starters_points'] for team points for past games
                 schedule_obj[team['matchup_id']].append({
                     "team": team_name,
                     "avatar": f"https://sleepercdn.com/avatars/thumbs/{user['avatar']}",
@@ -208,6 +209,16 @@ class SleeperApi:
     @functools.cached_property
     def get_drafts(self):
         return self.picks
+
+    def get_waiver_order(self):
+        print(self.rosters[0])
+        waiver_order = {}
+        for roster in self.rosters:
+            roster = next((r for r in self.rosters if r['roster_id'] == roster['roster_id']), None)
+            user = next((r for r in self.users if r['user_id'] == roster['owner_id']), None)
+            team_name = user['metadata'].get('team_name', user['display_name'])
+            waiver_order[roster['settings']['waiver_position']] = team_name
+        return waiver_order
 
     def nfl_slate(self):
         slate_url = f"https://api.sleeper.app/v1/state/nfl"
