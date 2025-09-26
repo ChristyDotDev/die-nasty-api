@@ -12,7 +12,7 @@ def get_traded_draft_picks(draft_id):
 
 
 class SleeperApi:
-    POSITIONS = ["QB", "RB", "WR", "TE"]
+    POSITIONS = ["QB", "RB", "WR", "TE", "FB"]
 
     def ordinal(self, n):
         n = int(n)
